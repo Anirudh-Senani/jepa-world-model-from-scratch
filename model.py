@@ -154,8 +154,10 @@ def init_target_encoder(encoder_params: dict) -> dict:
     # TODO: Create the EMA target encoder by deep-copying the online encoder params.
     return {key: val.detach().clone() for key, val in encoder_params.items()}
 
-# Step 11 - ema_update (not yet solved)
-# TODO: implement
+# Step 11 - ema_update
+def ema_update(target_params: dict, encoder_params: dict, tau: float = 0.99) -> dict:
+    # TODO: Refresh target encoder params via EMA of the online encoder.
+    return {key: target_params[key] * tau + encoder_params[key] * (1 - tau) for key in target_params}
 
 # Step 12 - encode_batch (not yet solved)
 # TODO: implement
