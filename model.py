@@ -292,8 +292,21 @@ def jepa_training_step(batch: dict, encoder_params: dict, target_params: dict, p
 
     return updated_encoder_params, updated_target_params, updated_predictor_params, loss.item(), collapse.item()
 
-# Step 24 - train_jepa (not yet solved)
-# TODO: implement
+# Step 24 - train_jepa
+def train_jepa(dataset: dict, encoder_params: dict, target_params: dict, predictor_params: dict, num_steps: int = 50, batch_size: int = 32, lr: float = 1e-3, tau: float = 0.99, seed: int = 0) -> tuple[dict, dict, dict, list]:
+    # TODO: Train JEPA for num_steps with collapse monitoring, return params + history
+    torch.manual_seed(seed)
+    history = []
+    N = dataset['observations'].shape[0]
+
+    for _ in range(num_steps):
+        inds = torch.randint(0, N, (batch_size,))
+        batch = {key: dataset[key][inds] for key in dataset}
+        encoder_params, target_params, predictor_params, loss, collapse = jepa_training_step(batch, encoder_params, target_params, predictor_params, lr, tau)
+
+        history.append({'loss':loss, 'collapse': collapse})
+
+    return encoder_params, target_params, predictor_params, history
 
 # Step 25 - rollout_latent_dynamics (not yet solved)
 # TODO: implement
