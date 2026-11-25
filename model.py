@@ -220,8 +220,15 @@ def variance_loss(embeddings: torch.Tensor, gamma: float = 1.0, eps: float = 1e-
     dim_std = torch.sqrt(embeddings.var(dim=0) + eps)
     return torch.relu(gamma - dim_std).mean()
 
-# Step 19 - covariance_loss (not yet solved)
-# TODO: implement
+# Step 19 - covariance_loss
+def covariance_loss(embeddings: torch.Tensor) -> torch.Tensor:
+    # TODO: Implement `covariance_loss` to compute the VICReg covariance regularization from embeddings.
+    B, D = embeddings.shape
+    centered = embeddings - embeddings.mean(dim=0, keepdim=True)
+    covariance = (centered.T @ centered)/(B-1)
+
+    loss = (covariance**2).sum() - (covariance.diagonal()**2).sum()
+    return loss/D
 
 # Step 20 - vicreg_regularizer (not yet solved)
 # TODO: implement
