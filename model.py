@@ -251,8 +251,46 @@ def collapse_metric(embeddings: torch.Tensor) -> torch.Tensor:
     # TODO: Measure collapse as the mean of per-dimension batch stds
     return embeddings.std(dim=0).mean()
 
-# Step 23 - jepa_training_step (not yet solved)
-# TODO: implement
+# Step 23 - jepa_training_step
+def jepa_training_step(batch: dict, encoder_params: dict, target_params: dict, predictor_params: dict, lr: float = 1e-3, tau: float = 0.99) -> tuple[dict, dict, dict, float, float]:
+    # TODO: Perform one full JEPA gradient update on a batch of transitions
+    for key in encoder_params:
+        encoder_params[key].grad = None
+
+    for key in target_params:
+        target_params[key].grad = None
+
+    for key in predictor_params:
+        predictor_params[key].grad = None
+
+    online_embeddings = encode_batch(batch['observations'], encoder_params)
+
+    with torch.no_grad():
+        target_embeddings = encode_batch(batch['next_observations'], target_params)
+
+    predicted_embeddings = predict_next_embedding(online_embeddings, batch['actions'], predictor_params)
+    loss = jepa_loss(predicted_embeddings, target_embeddings, online_embeddings)
+
+    loss.backward()
+
+    updated_encoder_params = {}
+    for key, param in encoder_params.items():
+        if param.grad is not None:
+            updated_encoder_params[key] = (param - lr * param.grad).detach().requires_grad_(True)
+        else:
+            updated_encoder_params[key] = encoder_params[key]
+
+    updated_predictor_params = {}
+    for key, param in predictor_params.items():
+        if param.grad is not None:
+            updated_predictor_params[key] = (param - lr * param.grad).detach().requires_grad_(True)
+        else:
+            updated_predictor_params[key] = predictor_params[key]
+
+    updated_target_params = ema_update(target_params, updated_encoder_params, tau)
+    collapse = collapse_metric(online_embeddings.detach())
+
+    return updated_encoder_params, updated_target_params, updated_predictor_params, loss.item(), collapse.item()
 
 # Step 24 - train_jepa (not yet solved)
 # TODO: implement
