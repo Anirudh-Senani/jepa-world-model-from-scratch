@@ -149,8 +149,10 @@ def encoder_forward(obs: torch.Tensor, encoder_params: dict) -> torch.Tensor:
     x = F.linear(x, encoder_params['fc_w'], bias=encoder_params['fc_b'])
     return x
 
-# Step 10 - init_target_encoder (not yet solved)
-# TODO: implement
+# Step 10 - init_target_encoder
+def init_target_encoder(encoder_params: dict) -> dict:
+    # TODO: Create the EMA target encoder by deep-copying the online encoder params.
+    return {key: val.detach().clone() for key, val in encoder_params.items()}
 
 # Step 11 - ema_update (not yet solved)
 # TODO: implement
