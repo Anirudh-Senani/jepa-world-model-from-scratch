@@ -370,11 +370,11 @@ def init_linear_probe(latent_dim: int = 32, state_dim: int = 2, seed: int = 0) -
 # Step 28 - train_linear_probe
 def train_linear_probe(embeddings: torch.Tensor, states: torch.Tensor, probe_params: dict, num_steps: int = 100, lr: float = 1e-2) -> dict:
     # TODO: Train the linear probe via MSE regression from frozen embeddings to true agent states.
-    emb = embeddings.detach().clone()
-    target = states.detach().clone()
+    # emb = embeddings.detach().clone()
+    # target = states.detach().clone()
 
-    emb.requires_grad = True
-    target.requires_grad = True
+    # emb.requires_grad = True
+    # target.requires_grad = True
 
     for _ in range(num_steps):
         params = {}
@@ -387,8 +387,8 @@ def train_linear_probe(embeddings: torch.Tensor, states: torch.Tensor, probe_par
         params['w'].grad = None
         params['b'].grad = None
 
-        preds = emb @ params['w'] + params['b']
-        loss = ((target - preds)**2).mean()
+        preds = embeddings.detach() @ params['w'] + params['b']
+        loss = ((preds - states.detach())**2).mean()
 
         loss.backward()
         with torch.no_grad():
