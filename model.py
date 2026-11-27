@@ -355,8 +355,17 @@ def multi_step_prediction_error(dataset: dict, encoder_params: dict, target_para
 
     return ((traj[1:] - target_embeddings)**2).mean().item()
 
-# Step 27 - init_linear_probe (not yet solved)
-# TODO: implement
+# Step 27 - init_linear_probe
+def init_linear_probe(latent_dim: int = 32, state_dim: int = 2, seed: int = 0) -> dict:
+    # TODO: Initialize a linear probe that maps latent embeddings to true agent state (x, y).
+    torch.manual_seed(seed)
+
+    w = torch.randn(state_dim, latent_dim) * 0.01
+    w.requires_grad = True
+
+    b = torch.zeros(state_dim, requires_grad=True)
+
+    return dict(w=w, b=b)
 
 # Step 28 - train_linear_probe (not yet solved)
 # TODO: implement
