@@ -451,8 +451,11 @@ def score_action_sequences(start_embedding, action_sequences, goal_embedding, pr
     traj = rollout_latent_dynamics(initial_embedding, action_sequences, predictor_params)
     return latent_cost(traj[1:], goal_embedding).sum(dim=0)
 
-# Step 34 - select_best_plan (not yet solved)
-# TODO: implement
+# Step 34 - select_best_plan
+def select_best_plan(action_sequences, costs):
+    # TODO: Return the action sequence with the lowest cost from the candidates.
+    ind = torch.argmin(costs)
+    return action_sequences[ind]
 
 # Step 35 - mpc_step (not yet solved)
 # TODO: implement
