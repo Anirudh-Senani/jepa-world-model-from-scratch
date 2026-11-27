@@ -464,8 +464,36 @@ def mpc_step(start_embedding, goal_embedding, predictor_params, n_sequences, hor
     costs = score_action_sequences(start_embedding, action_seqs, goal_embedding, predictor_params)
     return select_best_plan(action_seqs, costs).tolist()[0]
 
-# Step 36 - run_mpc_episode (not yet solved)
-# TODO: implement
+# Step 36 - run_mpc_episode
+def run_mpc_episode(encoder_params, predictor_params, goal_pos, room_size, agent_size, max_steps, n_sequences, horizon, n_actions):
+    # TODO: Run a closed-loop random-shooting MPC episode toward a goal position.
+    state, obs = env_reset(room_size)
+    goal_pos = torch.tensor(goal_pos)
+    goal_embedding = encode_goal(goal_pos, encoder_params, room_size)
+
+    trajectory = [tuple(state.tolist())]
+    success = False
+    steps = 0
+    while steps < max_steps:
+        if all((state == goal_pos).tolist()):
+            success = True
+            break
+
+        start_embedding = encode_batch(obs, encoder_params)
+        action = mpc_step(start_embedding.squeeze(0), goal_embedding, predictor_params, n_sequences, horizon, n_actions)
+        state, obs = env_step(state, action, room_size)
+        trajectory.append(tuple(state.tolist()))
+
+        steps += 1
+
+    final_distance = (((state - goal_pos)**2).sum().item())**0.5
+
+    return dict(
+        success=success,
+        steps=steps,
+        trajectory=trajectory,
+        final_distance=final_distance
+    )
 
 # Step 37 - evaluate_planner (not yet solved)
 # TODO: implement
