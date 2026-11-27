@@ -387,7 +387,7 @@ def train_linear_probe(embeddings: torch.Tensor, states: torch.Tensor, probe_par
         params['w'].grad = None
         params['b'].grad = None
 
-        preds = embeddings.detach() @ params['w'] + params['b']
+        preds = embeddings.detach() @ params['w'].T + params['b']
         loss = ((preds - states.detach())**2).mean()
 
         loss.backward()
@@ -399,8 +399,31 @@ def train_linear_probe(embeddings: torch.Tensor, states: torch.Tensor, probe_par
 
     return probe_params
 
-# Step 29 - probe_state_recovery (not yet solved)
-# TODO: implement
+# Step 29 - probe_state_recovery
+def probe_state_recovery(dataset: dict, encoder_params: dict, probe_params: dict | None = None, num_probe_steps: int = 100) -> dict:
+    # TODO: Encode observations, train linear probe, report state recovery metrics
+    embeddings = encode_batch(dataset['observations'], encoder_params)
+    latent_dim = embeddings.shape[-1]
+    state_dim = dataset['states'].shape[-1]
+
+    if probe_params is None:
+        probe_params = init_linear_probe(latent_dim=latent_dim, state_dim=state_dim)
+
+    # if probe_params['w'].shape[0] == latw_dim:
+    #     probe_params['w'] = probe_params['w'].T
+
+    probe_params = train_linear_probe(embeddings, dataset['states'], probe_params, num_probe_steps)
+
+    with torch.no_grad():
+        preds = embeddings @ probe_params['w'].T + probe_params['b']
+        mse = ((preds - dataset['states'])**2).mean()
+        mean_abs_error = ((preds - dataset['states']).abs()).mean()
+
+    return dict(
+        mse=mse.item(),
+        mean_abs_error=mean_abs_error.item(),
+        probe_params=probe_params
+    )
 
 # Step 30 - encode_goal (not yet solved)
 # TODO: implement
