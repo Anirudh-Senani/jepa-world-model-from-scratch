@@ -443,8 +443,13 @@ def sample_action_sequences(n_sequences, horizon, n_actions):
     # TODO: Sample random discrete action sequences for random-shooting MPC...
     return torch.randint(0, n_actions, (n_sequences, horizon))
 
-# Step 33 - score_action_sequences (not yet solved)
-# TODO: implement
+# Step 33 - score_action_sequences
+def score_action_sequences(start_embedding, action_sequences, goal_embedding, predictor_params):
+    # TODO: Score each action sequence by cumulative latent distance to the goal...
+    N, H = action_sequences.shape
+    initial_embedding = start_embedding.unsqueeze(0).expand(N, -1)
+    traj = rollout_latent_dynamics(initial_embedding, action_sequences, predictor_params)
+    return latent_cost(traj[1:], goal_embedding).sum(dim=0)
 
 # Step 34 - select_best_plan (not yet solved)
 # TODO: implement
