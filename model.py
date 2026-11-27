@@ -457,8 +457,12 @@ def select_best_plan(action_sequences, costs):
     ind = torch.argmin(costs)
     return action_sequences[ind]
 
-# Step 35 - mpc_step (not yet solved)
-# TODO: implement
+# Step 35 - mpc_step
+def mpc_step(start_embedding, goal_embedding, predictor_params, n_sequences, horizon, n_actions):
+    # TODO: Perform one random-shooting MPC step; return first action of best plan
+    action_seqs = sample_action_sequences(n_sequences, horizon, n_actions)
+    costs = score_action_sequences(start_embedding, action_seqs, goal_embedding, predictor_params)
+    return select_best_plan(action_seqs, costs).tolist()[0]
 
 # Step 36 - run_mpc_episode (not yet solved)
 # TODO: implement
