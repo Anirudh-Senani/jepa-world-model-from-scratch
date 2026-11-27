@@ -515,6 +515,34 @@ def evaluate_planner(encoder_params, predictor_params, room_size, agent_size, n_
         mean_final_distance=mean_final_distance/n_episodes
     )
 
-# Step 38 - jepa_world_model_experiment (not yet solved)
-# TODO: implement
+# Step 38 - jepa_world_model_experiment
+def jepa_world_model_experiment(room_size, agent_size, embed_dim, n_train_transitions, n_epochs, batch_size, n_probe_samples, n_eval_episodes, max_steps, n_sequences, horizon):
+    # TODO: run the full end-to-end JEPA world-model experiment and return a results dict
+    n_actions = 4
+    dataset = build_transition_dataset(n_train_transitions, room_size)
+    encoder_params = init_encoder_params(room_size=room_size, latent_dim=embed_dim)
+    target_params = init_target_encoder(encoder_params)
+
+    predictor_params = init_predictor_params(embed_dim, n_actions)
+    encoder_params, target_params, predictor_params, history = train_jepa(dataset, encoder_params, target_params, predictor_params, n_epochs, batch_size)
+
+    probe_dataset = {}
+    for key in dataset:
+        probe_dataset[key] = dataset[key][:n_probe_samples]
+
+    probe_stats = probe_state_recovery(probe_dataset, encoder_params)
+    evals = evaluate_planner(encoder_params, predictor_params, room_size, agent_size, n_eval_episodes, max_steps, n_sequences, horizon, n_actions)
+
+    probe_r2 = 1 - probe_stats['mse']/(probe_dataset['states'].var() + 1e-8)
+
+    train_losses = [record['loss'] for record in history]
+    collapse_metrics = [record['collapse'] for record in history]
+
+    return dict(
+        train_losses=train_losses,
+        collapse_metrics=collapse_metrics,
+        probe_r2=probe_r2.item(),
+        success_rate=evals['success_rate'],
+        mean_steps=evals['mean_steps']
+    )
 
