@@ -495,8 +495,25 @@ def run_mpc_episode(encoder_params, predictor_params, goal_pos, room_size, agent
         final_distance=final_distance
     )
 
-# Step 37 - evaluate_planner (not yet solved)
-# TODO: implement
+# Step 37 - evaluate_planner
+def evaluate_planner(encoder_params, predictor_params, room_size, agent_size, n_episodes, max_steps, n_sequences, horizon, n_actions):
+    # TODO: Evaluate the random-shooting MPC planner over multiple random start-goal episodes
+    success_rate = 0
+    mean_steps = 0
+    mean_final_distance = 0.0
+
+    for _ in range(n_episodes):
+        goal_pos = torch.randint(0, room_size, (2,)).float()
+        stats = run_mpc_episode(encoder_params, predictor_params, goal_pos, room_size, agent_size, max_steps, n_sequences, horizon, n_actions)
+        success_rate += int(stats['success'])
+        mean_steps += stats['steps']
+        mean_final_distance += stats['final_distance']
+
+    return dict(
+        success_rate=success_rate/n_episodes,
+        mean_steps=mean_steps/n_episodes,
+        mean_final_distance=mean_final_distance/n_episodes
+    )
 
 # Step 38 - jepa_world_model_experiment (not yet solved)
 # TODO: implement
