@@ -433,8 +433,10 @@ def encode_goal(goal_state: torch.Tensor, encoder_params: dict, room_size: int =
 
     return embedding.squeeze(0)
 
-# Step 31 - latent_cost (not yet solved)
-# TODO: implement
+# Step 31 - latent_cost
+def latent_cost(latents, goal_embedding):
+    # TODO: Compute squared L2 distance from each latent embedding to a goal embedding...
+    return ((latents - goal_embedding[None, :])**2).sum(dim=-1)
 
 # Step 32 - sample_action_sequences (not yet solved)
 # TODO: implement
